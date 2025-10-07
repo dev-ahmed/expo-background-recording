@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-android-background-recording": ["../src/index"],
+      "expo-android-background-recording/*": ["../src/*"]
+    }
+  }
+}
