@@ -1,9 +1,9 @@
 {
-  "platforms": ["apple", "android", "web"],
+  "platforms": ["apple", "android"],
   "apple": {
-    "modules": ["ExpoAndroidBackgroundRecordingModule"]
+    "modules": ["ExpoBackgroundRecordingModule"]
   },
   "android": {
-    "modules": ["expo.modules.androidbackgroundrecording.ExpoAndroidBackgroundRecordingModule"]
+    "modules": ["expo.modules.backgroundrecording.ExpoBackgroundRecordingModule"]
   }
 }

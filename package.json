@@ -1,5 +1,5 @@
 {
-  "name": "expo-android-background-recording",
+  "name": "expo-background-recording",
   "version": "0.1.0",
   "description": "Recording Audio in background for android",
   "main": "build/index.js",
@@ -13,31 +13,41 @@
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module",
     "open:ios": "xed example/ios",
-    "open:android": "open -a \"Android Studio\" example/android"
+    "open:android": "open -a \"Android Studio\" example/android",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "keywords": [
     "react-native",
     "expo",
-    "expo-android-background-recording",
-    "ExpoAndroidBackgroundRecording"
+    "expo-background-recording",
+    "ExpoBackgroundRecording"
   ],
-  "repository": "https://github.com/dev-ahmed/expo-android-background-recording",
+  "repository": "https://github.com/dev-ahmed/expo-background-recording",
   "bugs": {
-    "url": "https://github.com/dev-ahmed/expo-android-background-recording/issues"
+    "url": "https://github.com/dev-ahmed/expo-background-recording/issues"
   },
   "author": "dev-ahmed <dev.ahmednabil@gmail.com> (dev-ahmed)",
   "license": "MIT",
-  "homepage": "https://github.com/dev-ahmed/expo-android-background-recording#readme",
-  "dependencies": {},
+  "homepage": "https://github.com/dev-ahmed/expo-background-recording#readme",
+  "dependencies": {
+    "expo": "~54.0.12",
+    "expo-modules-core": "^3.0.21",
+    "react": "19.1.0",
+    "react-native": "0.81.4"
+  },
   "devDependencies": {
     "@types/react": "~19.1.0",
-    "expo-module-scripts": "^5.0.7",
     "expo": "^54.0.12",
+    "expo-module-scripts": "^5.0.7",
     "react-native": "0.81.4"
   },
   "peerDependencies": {
     "expo": "*",
     "react": "*",
     "react-native": "*"
+  },
+  "volta": {
+    "node": "20.16.0"
   }
 }

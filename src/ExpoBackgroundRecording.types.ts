@@ -1,4 +1,4 @@
-export type ExpoAndroidBackgroundRecordingModuleEvents = {
+export type ExpoBackgroundRecordingModuleEvents = {
   onRecordingStateChange: (params: RecordingStateChangePayload) => void;
 };
 
@@ -13,4 +13,8 @@ export type RecordingOptions = {
   channels?: number;
   bitRate?: number;
   outputFormat?: 'aac' | 'm4a' | '3gp';
+};
+
+export type ExpoBackgroundRecordingViewProps = {
+  style?: any;
 };

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "expo-android-background-recording-example",
-    "slug": "expo-android-background-recording-example",
+    "name": "expo-background-recording-example",
+    "slug": "expo-background-recording-example",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.androidbackgroundrecording.example"
+      "bundleIdentifier": "expo.modules.backgroundrecording.example"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "expo.modules.androidbackgroundrecording.example"
+      "package": "expo.modules.backgroundrecording.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"
