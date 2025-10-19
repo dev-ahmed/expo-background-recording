@@ -44,9 +44,9 @@ class ExpoBackgroundRecordingModule : Module() {
     AsyncFunction("startRecording") { options: Map<String, Any>?, promise: Promise ->
       try {
         Log.d("ExpoBackgroundRecording", "startRecording called, serviceBound: $serviceBound")
-        
-        val action = {
-          Log.d("ExpoBackgroundRecording", "Executing startRecording action")
+
+        if (serviceBound && recordingService != null) {
+          Log.d("ExpoBackgroundRecording", "Service already bound, executing immediately")
           val service = recordingService
           if (service != null) {
             service.startRecording(options) { success, error ->
@@ -63,16 +63,32 @@ class ExpoBackgroundRecordingModule : Module() {
               }
             }
           } else {
-            Log.e("ExpoBackgroundRecording", "Recording service is null in action")
             promise.reject("ERR_RECORDING", "Recording service not available", null)
           }
-        }
-
-        if (serviceBound && recordingService != null) {
-          Log.d("ExpoBackgroundRecording", "Service already bound, executing immediately")
-          action()
         } else {
           Log.d("ExpoBackgroundRecording", "Service not bound, queueing action and starting service")
+          val action = {
+            Log.d("ExpoBackgroundRecording", "Executing startRecording action")
+            val service = recordingService
+            if (service != null) {
+              service.startRecording(options) { success, error ->
+                Log.d("ExpoBackgroundRecording", "Recording callback: success=$success, error=$error")
+                if (success) {
+                  sendEvent("onRecordingStateChange", mapOf(
+                    "isRecording" to true,
+                    "isPaused" to false,
+                    "duration" to 0
+                  ))
+                  promise.resolve(null)
+                } else {
+                  promise.reject("ERR_RECORDING", error ?: "Failed to start recording", null)
+                }
+              }
+            } else {
+              Log.e("ExpoBackgroundRecording", "Recording service is null in action")
+              promise.reject("ERR_RECORDING", "Recording service not available", null)
+            }
+          }
           pendingActions.add(action)
           startForegroundService()
         }
@@ -84,17 +100,22 @@ class ExpoBackgroundRecordingModule : Module() {
 
     AsyncFunction("pauseRecording") { promise: Promise ->
       try {
-        recordingService?.pauseRecording { success, error ->
-          if (success) {
-            sendEvent("onRecordingStateChange", mapOf(
-              "isRecording" to true,
-              "isPaused" to true,
-              "duration" to (recordingService?.getDuration() ?: 0L).toInt()
-            ))
-            promise.resolve(null)
-          } else {
-            promise.reject("ERR_RECORDING", error ?: "Failed to pause recording", null)
+        val service = recordingService
+        if (service != null) {
+          service.pauseRecording { success, error ->
+            if (success) {
+              sendEvent("onRecordingStateChange", mapOf(
+                "isRecording" to true,
+                "isPaused" to true,
+                "duration" to (recordingService?.getDuration() ?: 0L).toInt()
+              ))
+              promise.resolve(null)
+            } else {
+              promise.reject("ERR_RECORDING", error ?: "Failed to pause recording", null)
+            }
           }
+        } else {
+          promise.reject("ERR_RECORDING", "Recording service not available", null)
         }
       } catch (e: Exception) {
         promise.reject("ERR_RECORDING", "Failed to pause recording: ${e.message}", e)
@@ -103,17 +124,22 @@ class ExpoBackgroundRecordingModule : Module() {
 
     AsyncFunction("resumeRecording") { promise: Promise ->
       try {
-        recordingService?.resumeRecording { success, error ->
-          if (success) {
-            sendEvent("onRecordingStateChange", mapOf(
-              "isRecording" to true,
-              "isPaused" to false,
-              "duration" to (recordingService?.getDuration() ?: 0L).toInt()
-            ))
-            promise.resolve(null)
-          } else {
-            promise.reject("ERR_RECORDING", error ?: "Failed to resume recording", null)
+        val service = recordingService
+        if (service != null) {
+          service.resumeRecording { success, error ->
+            if (success) {
+              sendEvent("onRecordingStateChange", mapOf(
+                "isRecording" to true,
+                "isPaused" to false,
+                "duration" to (recordingService?.getDuration() ?: 0L).toInt()
+              ))
+              promise.resolve(null)
+            } else {
+              promise.reject("ERR_RECORDING", error ?: "Failed to resume recording", null)
+            }
           }
+        } else {
+          promise.reject("ERR_RECORDING", "Recording service not available", null)
         }
       } catch (e: Exception) {
         promise.reject("ERR_RECORDING", "Failed to resume recording: ${e.message}", e)
@@ -122,18 +148,23 @@ class ExpoBackgroundRecordingModule : Module() {
 
     AsyncFunction("stopRecording") { promise: Promise ->
       try {
-        recordingService?.stopRecording { filePath, error ->
-          if (filePath != null) {
-            sendEvent("onRecordingStateChange", mapOf(
-              "isRecording" to false,
-              "isPaused" to false,
-              "duration" to 0
-            ))
-            stopForegroundService()
-            promise.resolve(filePath)
-          } else {
-            promise.reject("ERR_RECORDING", error ?: "Failed to stop recording", null)
+        val service = recordingService
+        if (service != null) {
+          service.stopRecording { filePath, error ->
+            if (filePath != null) {
+              sendEvent("onRecordingStateChange", mapOf(
+                "isRecording" to false,
+                "isPaused" to false,
+                "duration" to 0
+              ))
+              stopForegroundService()
+              promise.resolve(filePath)
+            } else {
+              promise.reject("ERR_RECORDING", error ?: "Failed to stop recording", null)
+            }
           }
+        } else {
+          promise.reject("ERR_RECORDING", "Recording service not available", null)
         }
       } catch (e: Exception) {
         promise.reject("ERR_RECORDING", "Failed to stop recording: ${e.message}", e)

@@ -1,35 +1,126 @@
-# expo-android-background-recording
+# expo-background-recording
 
-Recording Audio in background for android
+Recording Audio in background for Android
 
-# API documentation
+## Installation
 
-- [Documentation for the latest stable release](https://docs.expo.dev/versions/latest/sdk/android-background-recording/)
-- [Documentation for the main branch](https://docs.expo.dev/versions/unversioned/sdk/android-background-recording/)
-
-# Installation in managed Expo projects
-
-For [managed](https://docs.expo.dev/archive/managed-vs-bare/) Expo projects, please follow the installation instructions in the [API documentation for the latest stable release](#api-documentation). If you follow the link and there is no documentation available then this library is not yet usable within managed projects &mdash; it is likely to be included in an upcoming Expo SDK release.
-
-# Installation in bare React Native projects
-
-For bare React Native projects, you must ensure that you have [installed and configured the `expo` package](https://docs.expo.dev/bare/installing-expo-modules/) before continuing.
-
-### Add the package to your npm dependencies
-
-```
-npm install expo-android-background-recording
+```bash
+pnpm add expo-background-recording
 ```
 
-### Configure for Android
+## API
 
+### Methods
 
+#### `startRecording(options?: RecordingOptions): Promise<void>`
 
+Starts audio recording with optional configuration.
 
-### Configure for iOS
+**Options:**
+- `sampleRate?: number` - Sample rate in Hz (default: 44100)
+- `channels?: number` - Number of channels (default: 2)
+- `bitRate?: number` - Bit rate in bits per second (default: 128000)
+- `outputFormat?: 'aac' | 'm4a' | '3gp'` - Output format (default: 'm4a')
 
-Run `npx pod-install` after installing the npm package.
+#### `pauseRecording(): Promise<void>`
 
-# Contributing
+Pauses the current recording.
 
-Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).
+#### `resumeRecording(): Promise<void>`
+
+Resumes a paused recording.
+
+#### `stopRecording(): Promise<string>`
+
+Stops recording and returns the file URI.
+
+#### `getRecordingState(): Promise<RecordingState>`
+
+Returns the current recording state.
+
+**Returns:**
+```typescript
+{
+  isRecording: boolean;
+  isPaused: boolean;
+  duration: number;
+}
+```
+
+### Events
+
+#### `onRecordingStateChange`
+
+Emitted when the recording state changes.
+
+**Payload:**
+```typescript
+{
+  isRecording: boolean;
+  isPaused: boolean;
+  duration: number;
+}
+```
+
+## Usage
+
+```typescript
+import { useState, useEffect } from 'react';
+import ExpoBackgroundRecording, { RecordingStateChangePayload } from 'expo-background-recording';
+import { Alert, PermissionsAndroid, Platform } from 'react-native';
+
+const requestPermissions = async () => {
+  if (Platform.OS === 'android') {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  }
+  return true;
+};
+
+const startRecording = async () => {
+  const hasPermission = await requestPermissions();
+  if (!hasPermission) {
+    Alert.alert('Error', 'Microphone permission is required');
+    return;
+  }
+
+  await ExpoBackgroundRecording.startRecording({
+    sampleRate: 44100,
+    channels: 2,
+    bitRate: 128000,
+    outputFormat: 'm4a',
+  });
+};
+
+const stopRecording = async () => {
+  const uri = await ExpoBackgroundRecording.stopRecording();
+  console.log('Recording saved at:', uri);
+};
+
+const useRecordingState = () => {
+  const [recordingState, setRecordingState] = useState({
+    isRecording: false,
+    isPaused: false,
+    duration: 0,
+  });
+
+  useEffect(() => {
+    const subscription = ExpoBackgroundRecording.addListener(
+      'onRecordingStateChange',
+      (event: RecordingStateChangePayload) => {
+        setRecordingState(event);
+      },
+    );
+
+    return () => subscription.remove();
+  }, []);
+
+  return recordingState;
+};
+```
+
+## License
+
+MIT

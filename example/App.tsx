@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import ExpoBackgroundRecording, { RecordingStateChangePayload } from '../src';
-import { Alert, Button, Text, View, PermissionsAndroid, Platform } from 'react-native';
+import {
+  Alert,
+  Button,
+  Text,
+  View,
+  PermissionsAndroid,
+  Platform,
+  AppState,
+} from 'react-native';
 import { useAudioPlayer } from 'expo-audio';
 
 export default function App() {
@@ -10,19 +18,62 @@ export default function App() {
     duration: 0,
   });
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
-  const player = useAudioPlayer(recordingUri || '');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const player = useAudioPlayer();
+
+  console.log('recordingUri', recordingUri, player.playing, recordingState);
 
   useEffect(() => {
-    const subscription = ExpoBackgroundRecording.addListener('onRecordingStateChange', (event: RecordingStateChangePayload) => {
-      setRecordingState(event);
-    });
-    return () => subscription.remove();
+    if (recordingUri) {
+      player.replace(recordingUri);
+    }
+  }, [recordingUri]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsPlaying(player.playing);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [player]);
+
+  const syncRecordingState = async () => {
+    try {
+      const state = await ExpoBackgroundRecording.getRecordingState();
+      setRecordingState(state);
+    } catch (error) {
+      console.error('Failed to sync recording state:', error);
+    }
+  };
+
+  useEffect(() => {
+    syncRecordingState();
+
+    const subscription = ExpoBackgroundRecording.addListener(
+      'onRecordingStateChange',
+      (event: RecordingStateChangePayload) => {
+        setRecordingState(event);
+      },
+    );
+
+    const appStateSubscription = AppState.addEventListener(
+      'change',
+      (nextAppState) => {
+        if (nextAppState === 'active') {
+          syncRecordingState();
+        }
+      },
+    );
+
+    return () => {
+      subscription.remove();
+      appStateSubscription.remove();
+    };
   }, []);
 
   const requestPermissions = async () => {
     if (Platform.OS === 'android') {
       const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
@@ -44,11 +95,16 @@ export default function App() {
         bitRate: 128000,
         outputFormat: 'm4a',
       });
-      console.log('result', result);
+      console.log('startRecording promise resolved:', result);
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const state = await ExpoBackgroundRecording.getRecordingState();
+      console.log('State after 500ms:', state);
+      setRecordingState(state);
     } catch (error) {
       Alert.alert('Error', `Failed to start recording: ${error}`);
-    }
-    finally {
+    } finally {
       console.log('startRecording finished');
     }
   };
@@ -80,16 +136,19 @@ export default function App() {
   };
 
   const playAudio = () => {
-    if (player.playing) {
+    if (isPlaying) {
       player.pause();
+      setIsPlaying(false);
     } else {
       player.play();
+      setIsPlaying(true);
     }
   };
 
   const stopAudio = () => {
     player.seekTo(0);
     player.pause();
+    setIsPlaying(false);
   };
 
   return (
@@ -146,13 +205,10 @@ export default function App() {
 
             <View style={styles.audioControls}>
               <Button
-                title={player.playing ? 'Pause' : 'Play'}
+                title={isPlaying ? 'Pause' : 'Play'}
                 onPress={playAudio}
               />
-              <Button
-                title="Stop"
-                onPress={stopAudio}
-              />
+              <Button title="Stop" onPress={stopAudio} />
             </View>
           </View>
         )}
@@ -163,7 +219,7 @@ export default function App() {
 
 const styles = {
   container: {
-    marginTop:100,
+    marginTop: 100,
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
