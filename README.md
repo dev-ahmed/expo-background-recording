@@ -8,6 +8,28 @@ Recording Audio in background for Android
 pnpm add expo-background-recording
 ```
 
+### Configuration
+
+Add the plugin to your `app.json` or `app.config.js`:
+
+```json
+{
+  "expo": {
+    "plugins": ["expo-background-recording"]
+  }
+}
+```
+
+Then run prebuild to apply the configuration:
+
+```bash
+npx expo prebuild
+```
+
+The plugin automatically configures:
+- Required Android permissions (RECORD_AUDIO, FOREGROUND_SERVICE, FOREGROUND_SERVICE_MICROPHONE)
+- Foreground service declaration in AndroidManifest.xml
+
 ## API
 
 ### Methods

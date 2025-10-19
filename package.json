@@ -10,7 +10,6 @@
     "lint": "expo-module lint",
     "test": "expo-module test",
     "prepare": "expo-module prepare",
-    "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module",
     "open:ios": "xed example/ios",
     "open:android": "open -a \"Android Studio\" example/android",
@@ -30,6 +29,7 @@
   "author": "dev-ahmed <dev.ahmednabil@gmail.com> (dev-ahmed)",
   "license": "MIT",
   "homepage": "https://github.com/dev-ahmed/expo-background-recording#readme",
+  "app.plugin": "./app.plugin.js",
   "dependencies": {
     "expo": "~54.0.12",
     "expo-modules-core": "^3.0.21",
