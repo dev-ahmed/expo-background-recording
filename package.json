@@ -1,6 +1,6 @@
 {
   "name": "expo-background-recording",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Recording Audio in background for android",
   "main": "build/index.js",
   "types": "build/index.d.ts",
