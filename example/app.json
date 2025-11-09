@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.backgroundrecording.example"
+      "bundleIdentifier": "expo.modules.backgroundrecording.example",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "This app needs access to the microphone to record audio in the background."
+      }
     },
     "android": {
       "adaptiveIcon": {

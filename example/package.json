@@ -13,7 +13,7 @@
     "expo-audio": "^1.0.13",
     "expo-system-ui": "^6.0.7",
     "react": "19.1.0",
-    "react-native": "0.81.4"
+    "react-native": "0.81.5"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
